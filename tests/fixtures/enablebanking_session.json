@@ -1,0 +1,74 @@
+{
+  "_comment": "Sanitized POST /sessions response, shaped after a real one (Wise + Polish ASPSP traits). Synthetic IBANs (unassigned 99999999 bank code, see AGENTS.md); invented account names. Note there is NO accounts_data array here - that belongs to GET /sessions; POST carries identification_hash on the account object itself.",
+  "session_id": "sess-fixture-1",
+  "status": "AUTHORIZED",
+  "psu_type": "personal",
+  "aspsp": {
+    "name": "Example Bank",
+    "country": "PL"
+  },
+  "access": {
+    "valid_until": "2027-01-15T00:00:00+00:00",
+    "accounts": null,
+    "balances": true,
+    "transactions": true
+  },
+  "accounts": [
+    {
+      "uid": "acc-with-iban",
+      "identification_hash": "hash-with-iban",
+      "identification_hashes": ["hash-with-iban"],
+      "all_account_ids": [
+        {"scheme_name": "IBAN", "identification": "PL03999999990000000000000005", "issuer": null}
+      ],
+      "currency": "PLN",
+      "name": "Konto Osobiste",
+      "product": "Personal Current Account",
+      "usage": "PRIV",
+      "cash_account_type": "CACC",
+      "details": "Example account",
+      "credit_limit": null,
+      "legal_age": null,
+      "postal_address": null,
+      "psu_status": null,
+      "account_id": {
+        "iban": "PL03999999990000000000000005",
+        "other": null
+      },
+      "account_servicer": {
+        "bic_fi": "EXMPPLPW",
+        "clearing_system_member_id": {
+          "scheme_name": "PLKNR",
+          "identification": "9999"
+        }
+      }
+    },
+    {
+      "uid": "acc-with-nrb",
+      "identification_hash": "hash-with-nrb",
+      "currency": "EUR",
+      "name": "Rachunek Walutowy",
+      "cash_account_type": "CACC",
+      "account_id": {
+        "iban": null,
+        "other": {
+          "identification": "19999999990000000000009999",
+          "scheme_name": "BBAN",
+          "issuer": null
+        }
+      },
+      "account_servicer": {
+        "bic_fi": "EXMPPLPW"
+      }
+    },
+    {
+      "uid": "acc-no-identifier",
+      "currency": "USD",
+      "name": "USD balance",
+      "account_id": null,
+      "account_servicer": null,
+      "postal_address": null,
+      "psu_status": null
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+name: Bug report
+description: Something the tool does wrong — a bad OFX file, a failed fetch, a bank it mishandles.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Sanitize first.** Anything posted here is public and editing does not remove it —
+        GitHub keeps a visible edit history. Replace account numbers, payee names, client or
+        employer names, invoice numbers, balances and transaction counts before pasting.
+        See [SECURITY.md](../blob/main/SECURITY.md#sanitizing-before-you-post).
+
+  - type: checkboxes
+    id: sanitized
+    attributes:
+      label: Data check
+      options:
+        - label: I have replaced every real account number, payee, amount and count in this report.
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The command you ran and, if relevant, a *sanitized* sample of the OFX or API response.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: bank
+    attributes:
+      label: Bank / ASPSP
+      description: As it appears in `gnucash-ofx aspsps` — e.g. "Bank Millennium (PL)". Leave blank if not bank-specific.
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: gnucash-ofx commit, Python version, OS, and GnuCash version if the problem shows up at import.
+    validations:
+      required: true

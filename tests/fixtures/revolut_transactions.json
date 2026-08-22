@@ -1,0 +1,118 @@
+{
+  "_comment": "Sanitized Revolut /transactions responses, one per pocket uid, shaped after the first real fetch (docs/adr-revolut-onboarding.md decision 8). Structural properties this fixture must preserve: (1) transaction_id is null on every transaction, so FITID falls through to entry_reference; (2) a currency conversion is always two transactions in two different pockets whose entry_reference is one byte-identical 36-char lowercase UUID - here the EUR/USD pair sits entirely inside the shared-master-IBAN group (the data-loss regression case) and the PLN/GBP pair straddles it; (3) the bank_transaction_code vocabulary below (EXCHANGE, TOPUP, TRANSFER) is what one fetch of one connection observed - it is NOT closed, and no test may assert it is; (4) no remittance element is a machine reference (no <PREFIX>-<id> shapes), so Revolut output carries zero CHECKNUM/REFNUM; (5) counterparty presence tracks transaction TYPE, not direction: every non-conversion row carries a party name and account under iban, every conversion leg carries neither. booking_date == value_date (date-only) and exchange_rate is a present-but-null key throughout; instructed_amount is absent entirely.",
+  "acc-rev-aud": {
+    "transactions": [
+      {
+        "entry_reference": "cccccccc-3333-4ccc-8ccc-cccccccccccc",
+        "transaction_id": null,
+        "booking_date": "2026-06-05",
+        "value_date": "2026-06-05",
+        "transaction_amount": { "currency": "AUD", "amount": "50.00" },
+        "credit_debit_indicator": "CRDT",
+        "status": "BOOK",
+        "bank_transaction_code": { "code": "TOPUP", "sub_code": null },
+        "exchange_rate": null,
+        "debtor": { "name": "ACME Sp. z o.o." },
+        "debtor_account": { "iban": "PL00000000000000000000001" },
+        "remittance_information": ["Payment from ACME Sp. z o.o."]
+      }
+    ],
+    "continuation_key": null
+  },
+  "acc-rev-eur": {
+    "transactions": [
+      {
+        "entry_reference": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaaa",
+        "transaction_id": null,
+        "booking_date": "2026-06-10",
+        "value_date": "2026-06-10",
+        "transaction_amount": { "currency": "EUR", "amount": "100.00" },
+        "credit_debit_indicator": "DBIT",
+        "status": "BOOK",
+        "bank_transaction_code": { "code": "EXCHANGE", "sub_code": null },
+        "exchange_rate": null,
+        "remittance_information": ["Exchanged to USD"]
+      },
+      {
+        "entry_reference": "dddddddd-4444-4ddd-8ddd-dddddddddddd",
+        "transaction_id": null,
+        "booking_date": "2026-06-12",
+        "value_date": "2026-06-12",
+        "transaction_amount": { "currency": "EUR", "amount": "20.00" },
+        "credit_debit_indicator": "CRDT",
+        "status": "BOOK",
+        "bank_transaction_code": { "code": "TOPUP", "sub_code": null },
+        "exchange_rate": null,
+        "debtor": { "name": "ACME Sp. z o.o." },
+        "debtor_account": { "iban": "PL00000000000000000000001" },
+        "remittance_information": ["Payment from ACME Sp. z o.o.", "Top-up"]
+      }
+    ],
+    "continuation_key": null
+  },
+  "acc-rev-gbp": {
+    "transactions": [
+      {
+        "entry_reference": "bbbbbbbb-2222-4bbb-8bbb-bbbbbbbbbbbb",
+        "transaction_id": null,
+        "booking_date": "2026-06-15",
+        "value_date": "2026-06-15",
+        "transaction_amount": { "currency": "GBP", "amount": "90.00" },
+        "credit_debit_indicator": "CRDT",
+        "status": "BOOK",
+        "bank_transaction_code": { "code": "EXCHANGE", "sub_code": null },
+        "exchange_rate": null,
+        "remittance_information": ["Exchanged to GBP"]
+      }
+    ],
+    "continuation_key": null
+  },
+  "acc-rev-pln": {
+    "transactions": [
+      {
+        "entry_reference": "bbbbbbbb-2222-4bbb-8bbb-bbbbbbbbbbbb",
+        "transaction_id": null,
+        "booking_date": "2026-06-15",
+        "value_date": "2026-06-15",
+        "transaction_amount": { "currency": "PLN", "amount": "450.00" },
+        "credit_debit_indicator": "DBIT",
+        "status": "BOOK",
+        "bank_transaction_code": { "code": "EXCHANGE", "sub_code": null },
+        "exchange_rate": null,
+        "remittance_information": ["Exchanged to GBP"]
+      },
+      {
+        "entry_reference": "eeeeeeee-5555-4eee-8eee-eeeeeeeeeeee",
+        "transaction_id": null,
+        "booking_date": "2026-06-20",
+        "value_date": "2026-06-20",
+        "transaction_amount": { "currency": "PLN", "amount": "120.00" },
+        "credit_debit_indicator": "DBIT",
+        "status": "BOOK",
+        "bank_transaction_code": { "code": "TRANSFER", "sub_code": null },
+        "exchange_rate": null,
+        "creditor": { "name": "Example Utilities S.A." },
+        "creditor_account": { "iban": "PL00000000000000000000001" },
+        "remittance_information": ["To Example Utilities S.A."]
+      }
+    ],
+    "continuation_key": null
+  },
+  "acc-rev-usd": {
+    "transactions": [
+      {
+        "entry_reference": "aaaaaaaa-1111-4aaa-8aaa-aaaaaaaaaaaa",
+        "transaction_id": null,
+        "booking_date": "2026-06-10",
+        "value_date": "2026-06-10",
+        "transaction_amount": { "currency": "USD", "amount": "110.00" },
+        "credit_debit_indicator": "CRDT",
+        "status": "BOOK",
+        "bank_transaction_code": { "code": "EXCHANGE", "sub_code": null },
+        "exchange_rate": null,
+        "remittance_information": ["Exchanged to USD"]
+      }
+    ],
+    "continuation_key": null
+  }
+}

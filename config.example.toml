@@ -1,0 +1,114 @@
+# Copy to config.toml and adjust. Contains NO secrets (those live in .env).
+
+[output]
+# Directory where generated .ofx files are written.
+dir = "./output"
+
+[state]
+# Directory where session ids / consent expiry are persisted.
+dir = "./state"
+
+[cache]
+# Directory where fetched balances/transactions are cached so re-runs within ~6 hours don't
+# re-spend the bank's per-day rate-limit allowance. Pass `fetch --refresh` to force a live fetch.
+dir = "./cache"
+
+[fetch]
+# How `fetch` packages what it writes. Both are preferences rather than per-run choices, which is
+# why they live here — and both are packaging only: neither changes a single API request, so
+# setting them costs no rate-limit allowance. A CLI flag overrides whatever is set here.
+#
+# Write every account's statement into one OFX file instead of one file per account, so a monthly
+# import is a single pass through GnuCash's import assistant. Verified on GnuCash 5.16 only; use
+# `fetch --no-combine` to turn it off for one run.
+# combine = true
+#
+# Split each account's statements into files of at most this many transactions, oldest first, so a
+# large catch-up arrives as several review-sized imports instead of one unwieldy list. A booking
+# date is never split, so a day with more than this many transactions stays whole — treat it as a
+# cap, not a guarantee. 120 leaves ordinary runs alone and splits only a multi-month catch-up;
+# pick lower if you prefer shorter sittings. Use `fetch --no-batch-size` to ignore it for one run.
+# batch_size = 120
+#
+# `refresh` is deliberately NOT settable here: it re-fetches from the bank and spends rate-limit
+# allowance, so it has to stay a deliberate per-run act. Pass `fetch --refresh` when you mean it.
+
+# --- Enable Banking banks ---
+# `aspsp` / `country` must match an institution from `GET /aspsps` EXACTLY.
+# Discover the exact names with:  gnucash-ofx aspsps --country PL
+# Then `gnucash-ofx link <key>` to authorize, and `fetch` pulls all authorized accounts.
+#
+# `bankid` (optional) is the OFX BANKID — normally the bank's BIC. Without it the bank key is
+# truncated to 9 characters. GnuCash derives an account's online_id from BANKID+ACCTID, so
+# CHANGING THIS LATER ORPHANS ALREADY-IMPORTED ACCOUNTS — set it before your first import.
+# OFX limits BANKID to 9 characters, so an 11-character BIC is reduced to its 8-character
+# primary-office form. Leave it unset for a connection whose accounts span several institutions
+# (Wise, whose balances are serviced by different local banks per currency).
+
+[banks.alior]
+source = "enablebanking"
+aspsp = "Alior Bank"
+country = "PL"
+bankid = "ALBPPLPW"
+# psu_type defaults to "personal". Add psu_type = "business" for business accounts
+# (business accounts require a separate link run from personal accounts).
+
+[banks.alior_business]
+source = "enablebanking"
+aspsp = "Alior Bank"
+country = "PL"
+psu_type = "business"
+
+[banks.millennium]
+source = "enablebanking"
+aspsp = "Bank Millennium"
+country = "PL"
+
+[banks.erste]
+source = "enablebanking"
+aspsp = "Erste Bank Polska"
+country = "PL"
+# Confirmed 2026-08-14 on the bank's own site (erste.pl FAQ): Erste Bank Polska — formerly
+# Santander Bank Polska — kept the WBKPPLPP BIC after the acquisition. The Enable Banking catalog
+# entry carries no bic at all, so the bank's own statement is the source here (#51).
+bankid = "WBKPPLPP"
+
+# --- Wise (also via Enable Banking; no separate API token) ---
+# Wise exposes one account per currency balance, so fetch writes one OFX per currency.
+# Personal and business are separate Wise logins, so link each key on its own.
+[banks.wise_personal]
+source = "enablebanking"
+aspsp = "Wise"
+country = "PL"
+
+[banks.wise_business]
+source = "enablebanking"
+aspsp = "Wise"
+country = "PL"
+
+# --- Revolut (#32) ---
+# Registered under PL (docs/adr-revolut-onboarding.md decision 4): the account is held under
+# Poland, and an IBAN's country prefix says where it was issued, not which catalog entry a
+# consent belongs under — the pockets carry mostly LT-prefixed IBANs and PL still surfaces all
+# of them. Register exactly ONE of PL / LT, never both (decision 5): two entries would be two
+# rate-limit domains over one institution's allowance.
+# bankid is the catalog BIC, typed by hand rather than auto-filled (decision 3):
+# account_servicer is null on every pocket, so no per-account BIC is ever coming.
+# One account per currency pocket, four of them sharing one master IBAN — ACCTID resolves
+# through identification_hash for the whole connection (decision 1).
+# Personal only; a business connection is a separate login, so give it its own key with
+# psu_type = "business" (decision 6).
+[banks.revolut]
+source = "enablebanking"
+aspsp = "Revolut"
+country = "PL"
+bankid = "REVOLT21"
+
+# --- N26 (#33) ---
+# Confirmed via `gnucash-ofx aspsps --country DE`: not beta, psu_types [business, personal],
+# bic "NTSBDEBBXXX" — reduced to its 8-character primary-office form per the BANKID note above.
+[banks.n26]
+source = "enablebanking"
+aspsp = "N26"
+country = "DE"
+bankid = "NTSBDEBB"

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Secrets and local config (NEVER commit)
+.env
+*.pem
+*.key
+# Your real config lives here; config.example.toml is the committed template.
+config.toml
+
+# Local runtime state and generated financial data (NEVER commit)
+/state/
+/output/
+/cache/
+*.ofx
+/state.bak-*/
+/cache.bak-*/

@@ -1,0 +1,119 @@
+{
+  "_comment": "Sanitized POST /sessions response shaped after a real Revolut link (docs/adr-revolut-onboarding.md decision 8). Five currency pockets: four share one synthetic LT master IBAN and the PLN pocket carries its own synthetic PL one (both checksum-valid on unassigned 99999* bank codes, see AGENTS.md); the shared master appears in every pocket's all_account_ids; account_servicer is null on all five; the GBP pocket additionally carries a BBAN under account_id.other. identification_hash is distinct per pocket - the value ACCTID resolution falls through to when any IBAN in the connection is shared (decision 1, the uniform policy).",
+  "session_id": "sess-revolut-fixture",
+  "status": "AUTHORIZED",
+  "psu_type": "personal",
+  "aspsp": {
+    "name": "Revolut",
+    "country": "PL"
+  },
+  "access": {
+    "valid_until": "2027-02-08T00:00:00+00:00",
+    "accounts": null,
+    "balances": true,
+    "transactions": true
+  },
+  "accounts": [
+    {
+      "uid": "acc-rev-aud",
+      "identification_hash": "rev-hash-aud==",
+      "identification_hashes": ["rev-hash-aud=="],
+      "all_account_ids": [
+        {"scheme_name": "IBAN", "identification": "LT449999900000000021", "issuer": null}
+      ],
+      "currency": "AUD",
+      "name": "AUD",
+      "usage": "PRIV",
+      "cash_account_type": "CACC",
+      "product": null,
+      "details": null,
+      "credit_limit": null,
+      "legal_age": null,
+      "postal_address": null,
+      "psu_status": null,
+      "account_id": {
+        "iban": "LT449999900000000021",
+        "other": null
+      },
+      "account_servicer": null
+    },
+    {
+      "uid": "acc-rev-eur",
+      "identification_hash": "rev-hash-eur==",
+      "identification_hashes": ["rev-hash-eur=="],
+      "all_account_ids": [
+        {"scheme_name": "IBAN", "identification": "LT449999900000000021", "issuer": null}
+      ],
+      "currency": "EUR",
+      "name": "EUR",
+      "usage": "PRIV",
+      "cash_account_type": "CACC",
+      "product": null,
+      "account_id": {
+        "iban": "LT449999900000000021",
+        "other": null
+      },
+      "account_servicer": null
+    },
+    {
+      "uid": "acc-rev-gbp",
+      "identification_hash": "rev-hash-gbp==",
+      "identification_hashes": ["rev-hash-gbp=="],
+      "all_account_ids": [
+        {"scheme_name": "IBAN", "identification": "LT449999900000000021", "issuer": null},
+        {"scheme_name": "BBAN", "identification": "99990000000021", "issuer": null}
+      ],
+      "currency": "GBP",
+      "name": "GBP",
+      "usage": "PRIV",
+      "cash_account_type": "CACC",
+      "product": null,
+      "account_id": {
+        "iban": "LT449999900000000021",
+        "other": {
+          "identification": "99990000000021",
+          "scheme_name": "BBAN",
+          "issuer": null
+        }
+      },
+      "account_servicer": null
+    },
+    {
+      "uid": "acc-rev-pln",
+      "identification_hash": "rev-hash-pln==",
+      "identification_hashes": ["rev-hash-pln=="],
+      "all_account_ids": [
+        {"scheme_name": "IBAN", "identification": "PL56999999990000000000000021", "issuer": null},
+        {"scheme_name": "IBAN", "identification": "LT449999900000000021", "issuer": null}
+      ],
+      "currency": "PLN",
+      "name": "PLN",
+      "usage": "PRIV",
+      "cash_account_type": "CACC",
+      "product": null,
+      "account_id": {
+        "iban": "PL56999999990000000000000021",
+        "other": null
+      },
+      "account_servicer": null
+    },
+    {
+      "uid": "acc-rev-usd",
+      "identification_hash": "rev-hash-usd==",
+      "identification_hashes": ["rev-hash-usd=="],
+      "all_account_ids": [
+        {"scheme_name": "IBAN", "identification": "LT449999900000000021", "issuer": null}
+      ],
+      "currency": "USD",
+      "name": "USD",
+      "usage": "PRIV",
+      "cash_account_type": "CACC",
+      "product": null,
+      "account_id": {
+        "iban": "LT449999900000000021",
+        "other": null
+      },
+      "account_servicer": null
+    }
+  ]
+}

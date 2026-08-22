@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned by commit SHA, not by tag: a mutable tag can be retargeted at attacker code, and
+      # `permissions: contents: read` with no secrets bounds the blast radius without closing it —
+      # such a build could still lie about test results. Dependabot's `github-actions` group
+      # (.github/dependabot.yml) moves these pins, so pinning costs no maintenance.
+      # Resolved 2026-08-13: both were the commit `v7` already pointed at, so this changed nothing
+      # about what CI runs. Note `setup-uv`'s v7 is an *annotated* tag — the pin is the commit it
+      # dereferences to, not the tag object, which would not resolve.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Format check (ruff)
+        run: uv run ruff format --check .
+
+      - name: Type check (mypy)
+        run: uv run mypy src
+
+      - name: Install ofxdump (libofx — Linux, no ASCII-folding coverage)
+        continue-on-error: true
+        # continue-on-error only covers apt *failing*; a wedged mirror hangs instead (measured
+        # 2026-08-19: two runs stuck 15+/30+ min in this step vs a 62s normal). The timeout turns
+        # a hang into the designed skip path. Generous against the measured normal — raising it
+        # further just delays the tests this step must never block.
+        timeout-minutes: 5
+        run: sudo apt-get update && sudo apt-get install -y ofx
+
+      - name: Tests (pytest)
+        run: uv run pytest

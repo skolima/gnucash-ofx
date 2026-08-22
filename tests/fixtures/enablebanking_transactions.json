@@ -1,0 +1,142 @@
+{
+  "transactions": [
+    {
+      "entry_reference": "2026050400001",
+      "transaction_id": "tx-eb-1001",
+      "booking_date": "2026-05-04",
+      "value_date": "2026-05-04",
+      "transaction_amount": { "currency": "PLN", "amount": "42.50" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "creditor": { "name": "Biedronka Sp. z o.o." },
+      "creditor_account": { "iban": "PL00000000000000000000001" },
+      "remittance_information": ["Card payment", "BIEDRONKA 1234 KRAKOW"]
+    },
+    {
+      "entry_reference": "2026052000002",
+      "transaction_id": "tx-eb-1002",
+      "booking_date": "2026-05-20",
+      "value_date": "2026-05-20",
+      "transaction_amount": { "currency": "PLN", "amount": "3500.00" },
+      "credit_debit_indicator": "CRDT",
+      "status": "BOOK",
+      "debtor": { "name": "ACME Sp. z o.o." },
+      "remittance_information": ["Salary May 2026"]
+    },
+    {
+      "entry_reference": "2026052500003",
+      "booking_date": "2026-05-25",
+      "transaction_amount": { "currency": "PLN", "amount": "12.99" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "creditor": { "name": "Spotify" },
+      "remittance_information": []
+    },
+    {
+      "entry_reference": "TRWI-9000000001-BALANCE-0004",
+      "transaction_id": null,
+      "booking_date": "2026-05-27",
+      "transaction_amount": { "currency": "PLN", "amount": "820.00" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "creditor": { "name": "ACME Sp. z o.o." },
+      "remittance_information": ["TRANSFER-9000000001", "Invoice FS 1/05/2026"]
+    },
+    {
+      "entry_reference": "TRWI-9000000002-BALANCE-0005",
+      "transaction_id": null,
+      "booking_date": "2026-05-27",
+      "transaction_amount": { "currency": "PLN", "amount": "4.10" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "remittance_information": [
+        "FEE-TRANSFER-9000000001",
+        "Wise Charges for: TRANSFER-9000000001"
+      ]
+    },
+    {
+      "entry_reference": "TRWI-9000000003-BALANCE-0006",
+      "transaction_id": null,
+      "booking_date": "2026-05-28",
+      "transaction_amount": { "currency": "PLN", "amount": "37.90" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "remittance_information": ["CARD-9000000003", "Card payment to EXAMPLE STORE KRAKOW"]
+    },
+    {
+      "entry_reference": "TRWI-9000000004-BALANCE-0007",
+      "transaction_id": null,
+      "booking_date": "2026-05-28",
+      "transaction_amount": { "currency": "PLN", "amount": "0.71" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "remittance_information": ["FEE-CARD-9000000003", "Wise Charges for: CARD-9000000003"]
+    },
+    {
+      "entry_reference": "TRWI-9000000005-BALANCE-0008",
+      "transaction_id": null,
+      "booking_date": "2026-05-29",
+      "transaction_amount": { "currency": "PLN", "amount": "1.35" },
+      "credit_debit_indicator": "CRDT",
+      "status": "BOOK",
+      "remittance_information": [
+        "BALANCE_CASHBACK-9a1e07a1-fe12-4a3b-8c5d-01cb2dd3ce45",
+        "Cashback"
+      ]
+    },
+    {
+      "transaction_id": "tx-eb-pending",
+      "booking_date": "2026-05-31",
+      "transaction_amount": { "currency": "PLN", "amount": "99.00" },
+      "credit_debit_indicator": "DBIT",
+      "status": "PDNG",
+      "creditor": { "name": "Pending Merchant" },
+      "remittance_information": ["Authorization hold"]
+    },
+    {
+      "entry_reference": "TRWI-9100000001-BALANCE-0010",
+      "transaction_id": null,
+      "booking_date": "2026-05-30",
+      "transaction_amount": { "currency": "PLN", "amount": "345.00" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "bank_transaction_code": { "code": "CONVERSION" },
+      "remittance_information": ["BALANCE-9100000001"]
+    },
+    {
+      "entry_reference": "TRWI-9100000002-BALANCE-0011",
+      "transaction_id": null,
+      "booking_date": "2026-05-30",
+      "transaction_amount": { "currency": "PLN", "amount": "1.65" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "bank_transaction_code": { "code": "CONVERSION" },
+      "remittance_information": [
+        "FEE-BALANCE-9100000001",
+        "Wise Charges for: BALANCE-9100000001"
+      ]
+    },
+    {
+      "entry_reference": "TRWI-9100000003-BALANCE-0012",
+      "transaction_id": null,
+      "booking_date": "2026-05-30",
+      "transaction_amount": { "currency": "PLN", "amount": "10.00" },
+      "credit_debit_indicator": "DBIT",
+      "status": "BOOK",
+      "bank_transaction_code": { "code": "CONVERSION" },
+      "remittance_information": ["Not a balance reference"]
+    },
+    {
+      "entry_reference": "2026060100006",
+      "booking_date": "2026-06-01",
+      "transaction_amount": { "currency": "PLN", "amount": "51720.00" },
+      "credit_debit_indicator": "CRDT",
+      "status": "BOOK",
+      "remittance_information": [
+        "Rozliczenie transakcji Kantor Walutowy 220",
+        "Rozliczenie transakcji wymiany walut"
+      ]
+    }
+  ],
+  "continuation_key": null
+}

@@ -431,7 +431,10 @@ ADR, and approving a live probe.
   accounts, which share the session and could only fail identically. A bare 401 earns no
   diagnosis (it could be our own credentials), and `message` is never matched. The local
   `valid_until` check stays: it is the only warning that arrives before a lapse, and the gate
-  ahead of the first request.
+  ahead of the first request. Reversing either half spends a certain-to-fail request per account
+  at the ASPSP, or sends a credentials failure through a pointless SCA dance. Do not gate on the
+  `GET /sessions/{id}` body: no logged body has shown a status field, so that check would be an
+  invented contract (docs/decisions.md, "Errors carry an explanation", for the revisit trigger).
 - **A server never picks how long we wait, and a local bound exceeded raises rather than
   truncating.** A numeric `Retry-After` is clamped to `_MAX_BACKOFF_SECONDS` — the retry ladder's own
   ceiling, reused and never re-picked, so there is one answer to "how long can one retry wait" — and

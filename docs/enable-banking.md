@@ -424,14 +424,18 @@ The deal key is `revolut:<entry_reference>`, the third row in `_conversion_key`'
   died while `state/` still held 180-day grants with months to run: linked in August 2026, last
   successful fetch 2026-10-05, and on 2026-11-15 `GET
   /sessions/{id}` still answered **200** while every account's `/balances` answered
-  `{"code": 401, "message": "Session is expired", "error": "EXPIRED_SESSION", "detail": null}`.
+  `{"code": 401, "message": "Session is expired", "error": "EXPIRED_SESSION", "detail": null}`
+  (an ordinary `fetch`, not a probe: read from that run's stderr failure summary and its
+  `request` records in `state/fetch-log.jsonl`).
   The death falls somewhere in 2026-10-05 → 2026-11-15, which fits a 90-day cap on Wise's side
   despite the 180 days Enable Banking granted — a working hypothesis, not a measurement (a
   revocation, or expiry on Enable Banking's side, fits the same response); the next re-link's
   actual lifetime settles it. What the `GET /sessions` body said about the session's
   state was not logged, so whether it could have flagged the death before any account request is
-  unknown. `EXPIRED_SESSION` is now diagnosed (re-link) and abandons the bank's remaining accounts
-  after the first, like a 429: the session is shared, so every sibling fails identically.
+  unknown (why no gate was built on it, and its revisit trigger:
+  [decisions.md](decisions.md#errors-carry-an-explanation-only-when-we-have-one)).
+  `EXPIRED_SESSION` is now diagnosed (re-link) and abandons the bank's remaining accounts after
+  the first, like a 429: the session is shared, so every sibling fails identically.
 
 ## BIC
 

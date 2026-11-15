@@ -729,6 +729,24 @@ session and could only fail the same way. The local check stays — it is still 
 that arrives *before* a consent lapses — but `status`'s "consent valid for N days" is the grant,
 not the bank's current view.
 
+*Why not refuse the bank from the `GET /sessions/{id}` body, before any account request.* That is
+the obvious tighter fix — it would save the one `/balances` request the dead session still costs —
+and it was declined. `GET /sessions/{id}` answered `200` on both dead sessions, and the fetch log
+records status and error tokens, never response bodies, so nothing we hold says whether that body
+carried a status field, or that it would have read anything other than live. A gate on a field
+never seen populated is an invented contract: it would either never fire, or fire on a value whose
+meaning we guessed — the same failure as an invented `diagnose()` entry, one layer earlier.
+**Revisit** when a session body is captured showing a status field that distinguishes a dead
+session, or if the next Wise re-link's measured lifetime shows sessions dying routinely ahead of
+the grant, at which point the one request per death is worth an investigation.
+
+*Cost to change.* Reading a bare `401` as "re-link" sends a user with broken credentials through
+an SCA dance that fixes nothing. Letting the loop `continue` past `EXPIRED_SESSION` spends one
+certain-to-fail request per remaining account at the ASPSP. Dropping the local `valid_until` check
+because "the server tells us now" spends a request per account on a session already known dead,
+and loses the only advance warning — which at a bank serving ~90 days is the difference between
+a re-link and history that ages out.
+
 **Declining to grow the table is also a decision, made once so far — and half of that one was
 reversed the same day** (N26 envelope, [#54](https://github.com/skolima/gnucash-ofx/issues/54);
 the measurement itself lives in [enable-banking.md](enable-banking.md#error-envelope), not here).

@@ -48,6 +48,7 @@ from gnucash_ofx.coverage import (
     save_coverage,
     with_span,
 )
+from gnucash_ofx.diagnose import EXPIRED_SESSION, normalize_api_code
 
 # The per-account bad-data containment set lives beside the other data-boundary policy in
 # models.py (see the comment there) so the cache's merge can share it without an import cycle.
@@ -199,6 +200,15 @@ def _is_rate_limited(exc: BaseException) -> bool:
     fails identically — continuing would spend minutes of backoff per account to learn nothing.
     """
     return isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429
+
+
+def _is_session_expired(api_code: str | None) -> bool:
+    """True when the bank has ended the session itself, ahead of the stored ``valid_until``.
+
+    The session is shared by every account of the bank, so each remaining account would fail
+    identically - measured 2026-11-15, one ``401 EXPIRED_SESSION`` per account.
+    """
+    return normalize_api_code(api_code) == EXPIRED_SESSION
 
 
 def _response_details(exc: BaseException) -> tuple[int | None, str | None, str | None]:
@@ -1538,11 +1548,12 @@ def fetch_bank(
             status, api_code, payload = _response_details(exc)
             operation = _operation_of(exc)
             rate_limited = _is_rate_limited(exc)
+            session_expired = _is_session_expired(api_code)
             failures.append(
                 BankFailure(
                     bank_key=bank_key,
                     operation=operation,
-                    scope="bank" if rate_limited else "account",
+                    scope="bank" if rate_limited or session_expired else "account",
                     message=f"fetching {operation} failed",
                     account=_redact_account(acctids[uid]),
                     window=(date_from, date_to),
@@ -1555,6 +1566,11 @@ def fetch_bank(
             if rate_limited:
                 # Per-ASPSP allowance: the remaining accounts of this bank would fail identically.
                 progress(f"{bank_key}: rate limited, skipping its remaining account(s)")
+                break
+            if session_expired:
+                # invariant: EXPIRED_SESSION is bank-scoped - the siblings share the dead session
+                # AGENTS.md#invariants
+                progress(f"{bank_key}: session expired, skipping its remaining account(s)")
                 break
             continue
         except ResponseLimitExceeded as exc:

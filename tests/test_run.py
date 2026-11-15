@@ -1893,6 +1893,37 @@ def test_rate_limited_account_abandons_the_rest_of_the_bank(
     assert not any("/accounts/c/" in p for p in seen)  # c never attempted
 
 
+def test_expired_session_abandons_the_rest_of_the_bank(
+    private_key_pem: bytes, tmp_path: Path
+) -> None:
+    """A dead session is dead for every account in it - one failure, no further requests.
+
+    Measured 2026-11-15: `GET /sessions/{id}` answered 200, then every account's `/balances`
+    answered `401 EXPIRED_SESSION`, one identical failure per account.
+    """
+    seen: list[str] = []
+    expired = {"code": 401, "message": "Session is expired", "error": "EXPIRED_SESSION"}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        if path.startswith("/sessions/"):
+            return httpx.Response(200, json={"accounts": ["a", "b", "c"]})
+        seen.append(path)
+        return httpx.Response(401, json=expired)
+
+    written, failures = _fetch(
+        private_key_pem,
+        tmp_path,
+        handler,
+        {u: LinkedAccount(u, currency="PLN") for u in ("a", "b", "c")},
+    )
+    assert written == []
+    assert [(f.scope, f.status_code, f.api_code) for f in failures] == [
+        ("bank", 401, "EXPIRED_SESSION")
+    ]
+    assert all(p.startswith("/accounts/a/") for p in seen)  # b and c never attempted
+
+
 def test_unreadable_transaction_data_is_isolated(private_key_pem: bytes, tmp_path: Path) -> None:
     """A currency mismatch is one account's bad data, not the whole bank's problem."""
     bad = {

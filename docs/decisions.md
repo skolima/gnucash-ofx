@@ -715,9 +715,19 @@ Explanations never name institutions. Bank keys are user-chosen and the ASPSP se
 deployment, so "this bank" is the only phrasing that is true everywhere.
 
 **Expired consent is detected locally**, from the stored `valid_until`, before any request is
-made. That is why the table needs no entry for whatever an ASPSP returns for a dead session — we
-never get that far, and guessing the code would have been exactly the invented explanation this
-decision rules out.
+made — but that catches only the expiry we were told about. The table originally had no entry for
+a dead session on the grounds that we never get that far, and guessing the code would have been
+exactly the invented explanation this decision rules out. **That premise failed on 2026-11-15**:
+both Wise sessions ended months ahead of their stored dates — by whom (the bank, Enable Banking,
+or a revocation) was not measured — and the response
+was a live `401 EXPIRED_SESSION` (measurement in
+[enable-banking.md](enable-banking.md#consent)). An observed code is not a guess, so it now has an
+entry pointing at `link`, keyed on the code alone — a dead session is dead for every endpoint,
+and a bare 401 without it gets nothing, since it could as well be our own credentials. It is also
+treated like a 429: bank-scoped, and the remaining accounts are skipped, because they share the
+session and could only fail the same way. The local check stays — it is still the only warning
+that arrives *before* a consent lapses — but `status`'s "consent valid for N days" is the grant,
+not the bank's current view.
 
 **Declining to grow the table is also a decision, made once so far — and half of that one was
 reversed the same day** (N26 envelope, [#54](https://github.com/skolima/gnucash-ofx/issues/54);

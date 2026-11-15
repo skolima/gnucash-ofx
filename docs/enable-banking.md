@@ -85,7 +85,8 @@ not `message`:
 - `code` repeats the HTTP status; it carries no extra information.
 - `message` is prose for a human and is **not** stable enough to match on — the same
   `ASPSP_ERROR` reads as "Error interacting with ASPSP".
-- `error` is the token worth branching on (`ASPSP_ERROR`, `ASPSP_RATE_LIMIT_EXCEEDED`).
+- `error` is the token worth branching on (`ASPSP_ERROR`, `ASPSP_RATE_LIMIT_EXCEEDED`,
+  `EXPIRED_SESSION` — the last a `401` with `detail` null, see [Consent](#consent)).
 - `detail` is **not a reliable ASPSP/platform discriminator**: the first example is an
   `ASPSP_ERROR` with `detail` null, the third a live `ASPSP_ERROR` carrying the platform shape
   (N26 `/balances`, 2026-08-19) — three observations total, so no claim here about which shape is
@@ -419,6 +420,18 @@ The deal key is `revolut:<entry_reference>`, the third row in `_conversion_key`'
   requests the advertised maximum rather than a fixed 90 days.
 - A small margin is subtracted from the request: asking for the exact maximum can trip the
   ASPSP's own bound if the local clock runs slightly ahead of theirs.
+- **The granted `valid_until` is not a guarantee.** Both Wise connections (personal and business)
+  died while `state/` still held 180-day grants with months to run: linked in August 2026, last
+  successful fetch 2026-10-05, and on 2026-11-15 `GET
+  /sessions/{id}` still answered **200** while every account's `/balances` answered
+  `{"code": 401, "message": "Session is expired", "error": "EXPIRED_SESSION", "detail": null}`.
+  The death falls somewhere in 2026-10-05 → 2026-11-15, which fits a 90-day cap on Wise's side
+  despite the 180 days Enable Banking granted — a working hypothesis, not a measurement (a
+  revocation, or expiry on Enable Banking's side, fits the same response); the next re-link's
+  actual lifetime settles it. What the `GET /sessions` body said about the session's
+  state was not logged, so whether it could have flagged the death before any account request is
+  unknown. `EXPIRED_SESSION` is now diagnosed (re-link) and abandons the bank's remaining accounts
+  after the first, like a 429: the session is shared, so every sibling fails identically.
 
 ## BIC
 

@@ -425,6 +425,13 @@ ADR, and approving a live probe.
 - **`ASPSP_RATE_LIMIT_EXCEEDED` is never retried.** It is a daily cap with a ~6h recovery and the
   backoff ladder tops out at 31s, so every retry is certain to fail and is another counted request
   at an ASPSP that has just refused. Other 429s keep the ladder. Match on `error`, never `message`.
+- **`EXPIRED_SESSION` is bank-scoped, keyed on the `error` token alone, and never retried.** The
+  stored `valid_until` is the grant, not the bank's view — both Wise sessions died months early
+  (2026-11-15) — so a live `401 EXPIRED_SESSION` fails the bank once and skips its remaining
+  accounts, which share the session and could only fail identically. A bare 401 earns no
+  diagnosis (it could be our own credentials), and `message` is never matched. The local
+  `valid_until` check stays: it is the only warning that arrives before a lapse, and the gate
+  ahead of the first request.
 - **A server never picks how long we wait, and a local bound exceeded raises rather than
   truncating.** A numeric `Retry-After` is clamped to `_MAX_BACKOFF_SECONDS` — the retry ladder's own
   ceiling, reused and never re-picked, so there is one answer to "how long can one retry wait" — and

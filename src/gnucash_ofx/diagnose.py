@@ -16,6 +16,7 @@ from dataclasses import dataclass
 RATE_LIMIT = "ASPSP_RATE_LIMIT_EXCEEDED"
 ASPSP_ERROR = "ASPSP_ERROR"
 PSU_HEADER_MISSING = "PSU_HEADER_NOT_PROVIDED"
+EXPIRED_SESSION = "EXPIRED_SESSION"
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +46,18 @@ _PSU_HEADERS = Diagnosis(
     "a valid IPv4/IPv6 address.",
 )
 
+_SESSION_EXPIRED = Diagnosis(
+    "The session has ended before the expiry date stored at link time; that date is what was "
+    "granted, not the bank's current view. Nothing can be fetched for this bank until it is "
+    "linked again.",
+    "Re-link with gnucash-ofx link, then fetch again.",
+)
+
+
+def normalize_api_code(api_code: str | None) -> str:
+    """The one normalisation every comparison against a code above goes through."""
+    return (api_code or "").strip().upper()
+
 
 def diagnose(
     status_code: int | None, api_code: str | None, operation: str | None = None
@@ -54,11 +67,13 @@ def diagnose(
     ``api_code`` is Enable Banking's ``message``/``code`` field. Matching prefers it over the HTTP
     status, since the status alone (a bare 400) carries no meaning.
     """
-    code = (api_code or "").strip().upper()
+    code = normalize_api_code(api_code)
     if code == RATE_LIMIT or status_code == 429:
         return _RATE_LIMITED
     if code == PSU_HEADER_MISSING:
         return _PSU_HEADERS
+    if code == EXPIRED_SESSION:
+        return _SESSION_EXPIRED
     if code == ASPSP_ERROR and status_code == 400 and operation == "transactions":
         return _WINDOW_REFUSED
     return None

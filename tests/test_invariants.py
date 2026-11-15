@@ -50,7 +50,8 @@ class Citation:
     # the cache merge and its lag tripwire (#35), "k" the shared-IBAN uniform hash policy and
     # its IBAN-and-warn floor (#32), "l" the batch-splitting rules — never split a day, the
     # no-filename-marker deduction, final-batch-only live balance (#14), "m" the Revolut EXCHANGE
-    # deal key: read-only off the FITID field, and no key at all without a reference (#50)
+    # deal key: read-only off the FITID field, and no key at all without a reference (#50), "n"
+    # EXPIRED_SESSION: bank-scoped, keyed on the error token alone (2026-11-15, no issue)
     candidate: str
     bullet: str  # quoted (possibly abridged) from AGENTS.md's Invariants section
     module: str  # the test module the citation points at
@@ -486,6 +487,19 @@ MANIFEST: tuple[Citation, ...] = (
         "Revolut ever books one, is refused into unannotated text, never mis-paired.",
         "test_conversions",
         "test_different_dates_are_left_untouched",
+    ),
+    Citation(
+        "n",
+        "a live 401 EXPIRED_SESSION fails the bank once and skips its remaining accounts, which "
+        "share the session and could only fail identically.",
+        "test_run",
+        "test_expired_session_abandons_the_rest_of_the_bank",
+    ),
+    Citation(
+        "n",
+        "A bare 401 earns no diagnosis (it could be our own credentials).",
+        "test_diagnose",
+        "test_a_bare_401_is_not_read_as_an_expired_session",
     ),
 )
 

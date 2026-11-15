@@ -37,6 +37,25 @@ def test_psu_headers() -> None:
     assert finding.action is not None and "EB_PSU_IP" in finding.action
 
 
+def test_expired_session_points_at_relink() -> None:
+    """Observed live (2026-11-15) on `/balances` while the stored `valid_until` was months away.
+
+    The bank ended the consent on its own side, so the local expiry date is no defence and the
+    explanation must not blame the user's clock or the stored date.
+    """
+    finding = diagnose(401, "EXPIRED_SESSION", "balances")
+    assert finding is not None
+    assert "before the expiry date" in finding.explanation
+    assert finding.action is not None and "gnucash-ofx link" in finding.action
+    # Keyed on the code, not the operation: a dead session is dead for every endpoint.
+    assert diagnose(401, "EXPIRED_SESSION", "transactions") == finding
+
+
+def test_a_bare_401_is_not_read_as_an_expired_session() -> None:
+    """Only the verified code earns the explanation; a 401 alone could be our own credentials."""
+    assert diagnose(401, None, "balances") is None
+
+
 def test_unknown_codes_get_no_invented_explanation() -> None:
     assert diagnose(500, "SOMETHING_NEW", "transactions") is None
     assert diagnose(403, None, "transactions") is None
@@ -46,7 +65,12 @@ def test_unknown_codes_get_no_invented_explanation() -> None:
 def test_explanations_never_name_institutions() -> None:
     """Bank keys are user-chosen and the ASPSP set differs per deployment."""
     named = ("alior", "erste", "millennium", "wise", "santander")
-    for status, code in ((429, None), (400, "ASPSP_ERROR"), (400, "PSU_HEADER_NOT_PROVIDED")):
+    for status, code in (
+        (429, None),
+        (400, "ASPSP_ERROR"),
+        (400, "PSU_HEADER_NOT_PROVIDED"),
+        (401, "EXPIRED_SESSION"),
+    ):
         finding = diagnose(status, code, "transactions")
         assert finding is not None
         text = f"{finding.explanation} {finding.action or ''}".lower()
@@ -59,7 +83,12 @@ def test_explanations_are_ascii() -> None:
     These strings are printed on the failure path, which is the worst possible place to raise
     UnicodeEncodeError. The project already folds OFX text to ASCII for a related reason.
     """
-    for status, code in ((429, None), (400, "ASPSP_ERROR"), (400, "PSU_HEADER_NOT_PROVIDED")):
+    for status, code in (
+        (429, None),
+        (400, "ASPSP_ERROR"),
+        (400, "PSU_HEADER_NOT_PROVIDED"),
+        (401, "EXPIRED_SESSION"),
+    ):
         finding = diagnose(status, code, "transactions")
         assert finding is not None
         f"{finding.explanation} {finding.action}".encode("ascii")
